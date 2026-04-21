@@ -71,6 +71,14 @@ io.on('connection', (socket) => {
     }
   })
 
+  socket.on('edit-card', ({ columnKey, cardId, newText }) => {
+    const card = boardState[columnKey].cards.find((c) => c.id === cardId)
+    if (card) {
+      card.text = newText
+      io.emit('board-state', boardState)
+    }
+  })
+
   socket.on('reset-board', () => {
     boardState = {
       wentWell: {

@@ -75,6 +75,10 @@ function App() {
     socket?.emit('vote-card', { columnKey, cardId })
   }
 
+  const editCard = (columnKey: string, cardId: string, newText: string) => {
+    socket?.emit('edit-card', { columnKey, cardId, newText })
+  }
+
   const resetBoard = () => {
     if (confirm('Are you sure you want to clear all cards?')) {
       socket?.emit('reset-board')
@@ -114,6 +118,7 @@ function App() {
               onAddCard={(text) => addCard(key, text)}
               onDeleteCard={(id) => deleteCard(key, id)}
               onVote={(id) => voteCard(key, id)}
+              onEditCard={(id, newText) => editCard(key, id, newText)}
             />
           ))}
         </div>
