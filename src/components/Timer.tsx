@@ -1,9 +1,10 @@
 import { Input } from '@/components/ui/input.tsx';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button.tsx';
+import { Switch } from '@/components/ui/switch.tsx';
 import { Socket } from 'socket.io-client';
 import { toast } from 'sonner';
-import { Timer as TimerIcon } from 'lucide-react';
+import { Timer as TimerIcon, RotateCcw } from 'lucide-react';
 
 const START = 'Start';
 const PAUSE = 'Pause';
@@ -34,7 +35,7 @@ const Timer = ({ socket }: TimerProps) => {
     hasStarted: false,
     initialDuration: 300,
   });
-  const toastIdRef = useRef<string | number | undefined>(undefined);
+
   useEffect(() => {
     if (!socket) {
       return;
@@ -42,59 +43,17 @@ const Timer = ({ socket }: TimerProps) => {
     socket.on('timer-state', (state: TimerState) => {
       setTimerState(state);
 
-      // Update toast when timer is running
-      if (state.isRunning) {
-        if (toastIdRef.current) {
-          toast.dismiss(toastIdRef.current);
-        }
-
-        toastIdRef.current = toast.custom(
-          (t) => (
-            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-4 flex items-center gap-3 min-w-[300px]">
-              <TimerIcon className="h-6 w-6 text-blue-500" />
-              <div className="flex-1">
-                <div className="font-semibold text-gray-900 dark:text-gray-100">
-                  Timer Running
-                </div>
-                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 tabular-nums">
-                  {formatTime(state.remainingTime)}
-                </div>
-              </div>
-              <button
-                onClick={() => toast.dismiss(t)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-              >
-                ✕
-              </button>
-            </div>
-          ),
-          {
-            duration: Infinity,
-            id: 'timer-toast',
-          }
-        );
-      } else {
-        // Dismiss toast when timer is paused or finished
-        if (toastIdRef.current) {
-          toast.dismiss(toastIdRef.current);
-          toastIdRef.current = undefined;
-        }
-
-        // Show completion message if timer finished
-        if (state.remainingTime === 0) {
-          toast.success('Timer Complete!', {
-            description: 'The countdown has finished.',
-            duration: 5000,
-          });
-        }
+      // Show completion message only when timer reaches zero
+      if (!state.isRunning && state.remainingTime === 0) {
+        toast.success('Timer Complete!', {
+          description: 'The countdown has finished.',
+          duration: 5000,
+        });
       }
     });
 
     return () => {
       socket.off('timer-state');
-      if (toastIdRef.current) {
-        toast.dismiss(toastIdRef.current);
-      }
     };
   }, [socket]);
 
@@ -131,9 +90,9 @@ const Timer = ({ socket }: TimerProps) => {
           {formatTime(timerState.remainingTime)}
         </div>
       )}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2">
         <label htmlFor="input-time" className="text-sm text-muted-foreground">
-          Time
+          Timer
         </label>
         <Input
           id="input-time"
@@ -146,11 +105,28 @@ const Timer = ({ socket }: TimerProps) => {
         />
         <span className="text-sm text-muted-foreground">min</span>
       </div>
-      <Button onClick={toggle} size="sm">
-        {timerState.isRunning ? PAUSE : START}
-      </Button>
-      <Button disabled={!timerState.hasStarted} onClick={reset} size="sm" variant="outline">
-        Reset
+      <div className="flex items-center gap-2">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <Switch
+            checked={timerState.isRunning}
+            onCheckedChange={(checked) => {
+              console.log('Switch toggled:', checked);
+              toggle();
+            }}
+            className="border border-gray-400 dark:border-gray-500 shadow-sm"
+          />
+        </label>
+
+        <span className={`text-xs px-3 py-1 rounded-md w-[58px] text-center ${
+            timerState.isRunning
+                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+        }`}>
+            {timerState.isRunning ? 'Running' : 'Stopped'}
+          </span>
+      </div>
+      <Button disabled={!timerState.hasStarted} onClick={reset} size="icon" variant="ghost">
+        <RotateCcw className="h-4 w-4" />
       </Button>
     </div>
   );

@@ -2,11 +2,11 @@ import {useEffect, useState} from 'react'
 import {io, Socket} from 'socket.io-client'
 import {RetroCard, RetroColumn} from './components/RetroColumn'
 import {Button} from './components/ui/button'
-import {RotateCcw, Users, Download} from 'lucide-react'
+import {Download, RotateCcw, Users} from 'lucide-react'
 import Timer from '@/components/Timer.tsx'
 import {Toaster} from 'sonner'
 import {ExportDialog} from './components/ExportDialog'
-import {generateHTMLReport, downloadHTML, sanitizeFilename} from './lib/exportUtils'
+import {downloadHTML, generateHTMLReport, sanitizeFilename} from './lib/exportUtils'
 
 export interface ColumnData {
   title: string
@@ -98,57 +98,59 @@ function App() {
   }
 
   return (
-    <>
-      <Toaster position="top-right" />
-      <ExportDialog
-        isOpen={isExportDialogOpen}
-        onClose={() => setIsExportDialogOpen(false)}
-        onConfirm={handleExport}
-      />
-      <div className="min-h-screen bg-background p-6">
-        <div className="mx-auto space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold tracking-tight">Sprint Retrospective</h1>
-              <p className="text-muted-foreground mt-2">
-                Reflect on the sprint and identify improvements
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <div className={`h-2 w-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
-                <Users className="h-4 w-4" />
-                <span>{userCount} online</span>
+      <>
+        <Toaster position="bottom-right"/>
+        <ExportDialog
+            isOpen={isExportDialogOpen}
+            onClose={() => setIsExportDialogOpen(false)}
+            onConfirm={handleExport}
+        />
+        <div className="min-h-screen bg-background p-6">
+          <div className="mx-auto space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-4xl font-bold tracking-tight">Sprint Retrospective</h1>
+                <p className="text-muted-foreground mt-2">
+                  Reflect on the sprint and identify improvements
+                </p>
               </div>
-              <Timer socket={socket} />
-              <Button variant="outline" onClick={() => setIsExportDialogOpen(true)}>
-                <Download className="h-4 w-4 mr-2" />
-                Export
-              </Button>
-              <Button variant="outline" onClick={resetBoard}>
-                <RotateCcw className="h-4 w-4 mr-2" />
-                Reset Board
-              </Button>
+              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className={`h-2 w-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}/>
+                  <Users className="h-4 w-4"/>
+                  <span>{userCount} online</span>
+                </div>
+                <Timer socket={socket}/>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => setIsExportDialogOpen(true)} size="sm">
+                    <Download className="h-4 w-4 mr-2"/>
+                    Export
+                  </Button>
+                  <Button variant="outline" onClick={resetBoard} size="sm">
+                    <RotateCcw className="h-4 w-4 mr-2"/>
+                    Reset Board
+                  </Button>
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div className="flex gap-6 flex-wrap lg:flex-nowrap">
-            {Object.entries(columns).map(([key, column]) => (
-              <RetroColumn
-                key={key}
-                title={column.title}
-                color={column.color}
-                cards={column.cards}
-                onAddCard={(text) => addCard(key, text)}
-                onDeleteCard={(id) => deleteCard(key, id)}
-                onVote={(id) => voteCard(key, id)}
-                onEditCard={(id, newText) => editCard(key, id, newText)}
-              />
-            ))}
+            <div className="flex gap-6 flex-wrap lg:flex-nowrap">
+              {Object.entries(columns).map(([key, column]) => (
+                  <RetroColumn
+                      key={key}
+                      title={column.title}
+                      color={column.color}
+                      cards={column.cards}
+                      onAddCard={(text) => addCard(key, text)}
+                      onDeleteCard={(id) => deleteCard(key, id)}
+                      onVote={(id) => voteCard(key, id)}
+                      onEditCard={(id, newText) => editCard(key, id, newText)}
+                  />
+              ))}
+            </div>
           </div>
         </div>
-      </div>
-    </>
+      </>
   )
 }
 
