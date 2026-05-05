@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
-import { io, Socket } from 'socket.io-client'
-import { RetroColumn, RetroCard } from './components/RetroColumn'
-import { Button } from './components/ui/button'
-import { RotateCcw, Users } from 'lucide-react'
-import Timer from '@/components/Timer.tsx';
+import {useEffect, useState} from 'react'
+import {io, Socket} from 'socket.io-client'
+import {RetroCard, RetroColumn} from './components/RetroColumn'
+import {Button} from './components/ui/button'
+import {RotateCcw, Users} from 'lucide-react'
+import Timer from '@/components/Timer.tsx'
+import {Toaster} from 'sonner'
 
 interface ColumnData {
   title: string
@@ -65,19 +66,19 @@ function App() {
   }, [])
 
   const addCard = (columnKey: string, text: string) => {
-    socket?.emit('add-card', { columnKey, text })
+    socket?.emit('add-card', {columnKey, text})
   }
 
   const deleteCard = (columnKey: string, cardId: string) => {
-    socket?.emit('delete-card', { columnKey, cardId })
+    socket?.emit('delete-card', {columnKey, cardId})
   }
 
   const voteCard = (columnKey: string, cardId: string) => {
-    socket?.emit('vote-card', { columnKey, cardId })
+    socket?.emit('vote-card', {columnKey, cardId})
   }
 
   const editCard = (columnKey: string, cardId: string, newText: string) => {
-    socket?.emit('edit-card', { columnKey, cardId, newText })
+    socket?.emit('edit-card', {columnKey, cardId, newText})
   }
 
   const resetBoard = () => {
@@ -87,45 +88,48 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-[80%] mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold tracking-tight">Sprint Retrospective</h1>
-            <p className="text-muted-foreground mt-2">
-              Reflect on the sprint and identify improvements
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <div className={`h-2 w-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
-              <Users className="h-4 w-4" />
-              <span>{userCount} online</span>
+    <>
+      <Toaster position="top-right" />
+      <div className="min-h-screen bg-background p-6">
+        <div className="max-w-[80%] mx-auto space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold tracking-tight">Sprint Retrospective</h1>
+              <p className="text-muted-foreground mt-2">
+                Reflect on the sprint and identify improvements
+              </p>
             </div>
-            <Timer />
-            <Button variant="outline" onClick={resetBoard}>
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Reset Board
-            </Button>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div className={`h-2 w-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
+                <Users className="h-4 w-4" />
+                <span>{userCount} online</span>
+              </div>
+              <Timer socket={socket} />
+              <Button variant="outline" onClick={resetBoard}>
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Reset Board
+              </Button>
+            </div>
           </div>
-        </div>
 
-        <div className="flex gap-6 flex-wrap lg:flex-nowrap">
-          {Object.entries(columns).map(([key, column]) => (
-            <RetroColumn
-              key={key}
-              title={column.title}
-              color={column.color}
-              cards={column.cards}
-              onAddCard={(text) => addCard(key, text)}
-              onDeleteCard={(id) => deleteCard(key, id)}
-              onVote={(id) => voteCard(key, id)}
-              onEditCard={(id, newText) => editCard(key, id, newText)}
-            />
-          ))}
+          <div className="flex gap-6 flex-wrap lg:flex-nowrap">
+            {Object.entries(columns).map(([key, column]) => (
+              <RetroColumn
+                key={key}
+                title={column.title}
+                color={column.color}
+                cards={column.cards}
+                onAddCard={(text) => addCard(key, text)}
+                onDeleteCard={(id) => deleteCard(key, id)}
+                onVote={(id) => voteCard(key, id)}
+                onEditCard={(id, newText) => editCard(key, id, newText)}
+              />
+            ))}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 

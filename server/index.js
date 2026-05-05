@@ -39,11 +39,48 @@ let boardState = {
 
 let connectedUsers = 0
 
+// Timer state
+let timerState = {
+  remainingTime: 300, // 5 minutes in seconds
+  isRunning: false,
+  hasStarted: false,
+  initialDuration: 300,
+}
+
+let timerInterval = null
+
+// Function to broadcast timer state
+const broadcastTimerState = () => {
+  io.emit('timer-state', timerState)
+}
+
+// Timer countdown logic
+const startTimerCountdown = () => {
+  if (timerInterval) {
+    clearInterval(timerInterval)
+  }
+  
+  timerInterval = setInterval(() => {
+    if (timerState.isRunning && timerState.remainingTime > 0) {
+      timerState.remainingTime--
+      broadcastTimerState()
+      
+      if (timerState.remainingTime === 0) {
+        timerState.isRunning = false
+        clearInterval(timerInterval)
+        timerInterval = null
+        broadcastTimerState()
+      }
+    }
+  }, 1000)
+}
+
 io.on('connection', (socket) => {
   connectedUsers++
   console.log(`User connected. Total users: ${connectedUsers}`)
 
   socket.emit('board-state', boardState)
+  socket.emit('timer-state', timerState)
   io.emit('user-count', connectedUsers)
 
   socket.on('add-card', ({ columnKey, text }) => {
@@ -103,6 +140,34 @@ io.on('connection', (socket) => {
       },
     }
     io.emit('board-state', boardState)
+  })
+
+  // Timer events
+  socket.on('timer-start', () => {
+    timerState.isRunning = true
+    timerState.hasStarted = true
+    broadcastTimerState()
+    startTimerCountdown()
+  })
+
+  socket.on('timer-pause', () => {
+    timerState.isRunning = false
+    broadcastTimerState()
+  })
+
+  socket.on('timer-reset', () => {
+    timerState.remainingTime = timerState.initialDuration
+    timerState.isRunning = false
+    timerState.hasStarted = false
+    broadcastTimerState()
+  })
+
+  socket.on('timer-set', (durationInMinutes) => {
+    const seconds = durationInMinutes * 60
+    timerState.initialDuration = seconds
+    timerState.remainingTime = seconds
+    timerState.isRunning = false
+    broadcastTimerState()
   })
 
   socket.on('disconnect', () => {
