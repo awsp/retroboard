@@ -3,6 +3,7 @@ import { io, Socket } from 'socket.io-client'
 import { RetroColumn, RetroCard } from './components/RetroColumn'
 import { Button } from './components/ui/button'
 import { RotateCcw, Users } from 'lucide-react'
+import Timer from '@/components/Timer.tsx';
 
 interface ColumnData {
   title: string
@@ -87,7 +88,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-[80%] mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold tracking-tight">Sprint Retrospective</h1>
@@ -101,6 +102,7 @@ function App() {
               <Users className="h-4 w-4" />
               <span>{userCount} online</span>
             </div>
+            <Timer />
             <Button variant="outline" onClick={resetBoard}>
               <RotateCcw className="h-4 w-4 mr-2" />
               Reset Board
