@@ -2,11 +2,13 @@ import {useEffect, useState} from 'react'
 import {io, Socket} from 'socket.io-client'
 import {RetroCard, RetroColumn} from './components/RetroColumn'
 import {Button} from './components/ui/button'
-import {RotateCcw, Users} from 'lucide-react'
+import {RotateCcw, Users, Download} from 'lucide-react'
 import Timer from '@/components/Timer.tsx'
 import {Toaster} from 'sonner'
+import {ExportDialog} from './components/ExportDialog'
+import {generateHTMLReport, downloadHTML, sanitizeFilename} from './lib/exportUtils'
 
-interface ColumnData {
+export interface ColumnData {
   title: string
   color: string
   cards: RetroCard[]
@@ -38,6 +40,7 @@ function App() {
   const [socket, setSocket] = useState<Socket | null>(null)
   const [userCount, setUserCount] = useState(0)
   const [isConnected, setIsConnected] = useState(false)
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false)
 
   useEffect(() => {
     const socketUrl = import.meta.env.VITE_SOCKET_URL || window.location.origin.replace(/:\d+$/, ':3001')
@@ -87,11 +90,23 @@ function App() {
     }
   }
 
+  const handleExport = (reportName: string, date: string) => {
+    const html = generateHTMLReport(columns, reportName, date)
+    const sanitizedName = sanitizeFilename(reportName)
+    const filename = `${sanitizedName}-${date}.html`
+    downloadHTML(html, filename)
+  }
+
   return (
     <>
       <Toaster position="top-right" />
+      <ExportDialog
+        isOpen={isExportDialogOpen}
+        onClose={() => setIsExportDialogOpen(false)}
+        onConfirm={handleExport}
+      />
       <div className="min-h-screen bg-background p-6">
-        <div className="max-w-[80%] mx-auto space-y-6">
+        <div className="mx-auto space-y-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-bold tracking-tight">Sprint Retrospective</h1>
@@ -99,13 +114,17 @@ function App() {
                 Reflect on the sprint and identify improvements
               </p>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <div className={`h-2 w-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
                 <Users className="h-4 w-4" />
                 <span>{userCount} online</span>
               </div>
               <Timer socket={socket} />
+              <Button variant="outline" onClick={() => setIsExportDialogOpen(true)}>
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
               <Button variant="outline" onClick={resetBoard}>
                 <RotateCcw className="h-4 w-4 mr-2" />
                 Reset Board
