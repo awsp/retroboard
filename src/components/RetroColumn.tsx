@@ -100,17 +100,7 @@ export function RetroColumn({
                         className="min-h-[60px] bg-white border-0 focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full"
                       />
                     </div>
-                    <div className="flex items-center gap-1 mt-1">
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Info className="h-3 w-3 text-muted-foreground" />
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Press ⌘+Enter or Ctrl+Enter to save</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                    <div className="flex items-center gap-1 mt-2">
                       <p className="text-xs text-muted-foreground">
                         ⌘+Enter or Ctrl+Enter to save
                       </p>
@@ -180,10 +170,10 @@ export function RetroColumn({
                     className="min-h-[60px] bg-white border-0 focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full"
                   />
                 </div>
-                <div className="flex items-center gap-1 mt-1">
+                <div className="flex items-center gap-1 mt-2">
                   <TooltipProvider>
                     <Tooltip>
-                      <TooltipTrigger asChild>
+                      <TooltipTrigger>
                         <Info className="h-3 w-3 text-muted-foreground" />
                       </TooltipTrigger>
                       <TooltipContent>
