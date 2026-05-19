@@ -8,6 +8,8 @@ import { RotateCcw, Timer as TimerIcon } from "lucide-react";
 import confetti from "canvas-confetti";
 
 const DEFAULT_TIME = "5";
+const URGENT_THRESHOLD_SECONDS = 15;
+const POST_COMPLETION_PULSE_DURATION_MS = 5000;
 
 interface TimerProps {
   socket: Socket | null;
@@ -34,6 +36,7 @@ const Timer = ({ socket }: TimerProps) => {
     hasStarted: false,
     initialDuration: 300,
   });
+  const [showPulse, setShowPulse] = useState<boolean>(false);
 
   const triggerConfetti = () => {
     const duration = 3000;
@@ -95,6 +98,11 @@ const Timer = ({ socket }: TimerProps) => {
             description: "The countdown has finished.",
             duration: 5000,
           });
+
+          // Remove pulse effect after configured duration
+          setTimeout(() => {
+            setShowPulse(false);
+          }, POST_COMPLETION_PULSE_DURATION_MS);
         }
         return state;
       });
@@ -135,10 +143,35 @@ const Timer = ({ socket }: TimerProps) => {
     }
   };
 
+  const getTimerColor = () => {
+    if (timerState.remainingTime <= URGENT_THRESHOLD_SECONDS) {
+      return "text-red-600 dark:text-red-400";
+    }
+    const percentRemaining =
+      timerState.remainingTime / timerState.initialDuration;
+    if (percentRemaining <= 0.5) {
+      return "text-orange-600 dark:text-orange-400";
+    }
+    return "text-blue-600 dark:text-blue-400";
+  };
+
+  const isUrgent = timerState.remainingTime <= URGENT_THRESHOLD_SECONDS;
+
+  // Enable pulse during urgent phase or when timer just completed
+  useEffect(() => {
+    if (isUrgent && timerState.isRunning) {
+      setShowPulse(true);
+    } else if (timerState.remainingTime > URGENT_THRESHOLD_SECONDS) {
+      setShowPulse(false);
+    }
+  }, [isUrgent, timerState.isRunning, timerState.remainingTime]);
+
   return (
     <div className="flex items-center gap-2">
       {timerState.hasStarted && (
-        <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400 font-semibold tabular-nums">
+        <div
+          className={`flex items-center gap-1 font-semibold tabular-nums transition-colors duration-300 ${getTimerColor()} ${showPulse ? "animate-pulse" : ""}`}
+        >
           <TimerIcon className="h-4 w-4" />
           {formatTime(timerState.remainingTime)}
         </div>
@@ -171,7 +204,7 @@ const Timer = ({ socket }: TimerProps) => {
         </label>
 
         <span
-          className={`text-xs px-3 py-1 rounded-md w-[70px] text-center ${
+          className={`text-xs px-3 py-1 rounded-md w-[70px] text-center cursor-default ${
             timerState.isRunning
               ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
               : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
