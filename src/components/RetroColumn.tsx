@@ -10,6 +10,7 @@ import {
 } from "./ui/tooltip";
 import { Plus, Trash2, ThumbsUp, Pencil, Check, X, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BorderBeam } from "./ui/border-beam";
 
 export interface RetroCard {
   id: string;
@@ -212,14 +213,24 @@ export function RetroColumn({
               </div>
             </div>
           ) : (
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => setIsAdding(true)}
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Card
-            </Button>
+            <div className="relative rounded-md overflow-hidden">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => setIsAdding(true)}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Card
+              </Button>
+              <BorderBeam
+                size={60}
+                duration={5}
+                delay={0}
+                colorFrom="#fcc5e4"
+                colorTo="#c7d2fe"
+                borderWidth={2}
+              />
+            </div>
           )}
         </CardContent>
       </Card>
