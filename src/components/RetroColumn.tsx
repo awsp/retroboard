@@ -1,24 +1,30 @@
-import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
-import { Button } from './ui/button'
-import { Input } from './ui/input'
-import { Plus, Trash2, ThumbsUp, Pencil, Check, X } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Button } from "./ui/button";
+import { Textarea } from "./ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
+import { Plus, Trash2, ThumbsUp, Pencil, Check, X, Info } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export interface RetroCard {
-  id: string
-  text: string
-  votes: number
+  id: string;
+  text: string;
+  votes: number;
 }
 
 interface RetroColumnProps {
-  title: string
-  color: string
-  cards: RetroCard[]
-  onAddCard: (text: string) => void
-  onDeleteCard: (id: string) => void
-  onVote: (id: string) => void
-  onEditCard: (id: string, newText: string) => void
+  title: string;
+  color: string;
+  cards: RetroCard[];
+  onAddCard: (text: string) => void;
+  onDeleteCard: (id: string) => void;
+  onVote: (id: string) => void;
+  onEditCard: (id: string, newText: string) => void;
 }
 
 export function RetroColumn({
@@ -30,38 +36,38 @@ export function RetroColumn({
   onVote,
   onEditCard,
 }: RetroColumnProps) {
-  const [newCardText, setNewCardText] = useState('')
-  const [isAdding, setIsAdding] = useState(false)
-  const [editingCardId, setEditingCardId] = useState<string | null>(null)
-  const [editText, setEditText] = useState('')
+  const [newCardText, setNewCardText] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
+  const [editingCardId, setEditingCardId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
 
   const handleAdd = () => {
     if (newCardText.trim()) {
-      onAddCard(newCardText)
-      setNewCardText('')
-      setIsAdding(false)
+      onAddCard(newCardText);
+      setNewCardText("");
+      setIsAdding(false);
     }
-  }
+  };
 
   const startEdit = (card: RetroCard) => {
-    setEditingCardId(card.id)
-    setEditText(card.text)
-  }
+    setEditingCardId(card.id);
+    setEditText(card.text);
+  };
 
   const saveEdit = (cardId: string) => {
     if (editText.trim()) {
-      onEditCard(cardId, editText)
+      onEditCard(cardId, editText);
     }
-    setEditingCardId(null)
-    setEditText('')
-  }
+    setEditingCardId(null);
+    setEditText("");
+  };
 
   const cancelEdit = () => {
-    setEditingCardId(null)
-    setEditText('')
-  }
+    setEditingCardId(null);
+    setEditText("");
+  };
 
-  const sortedCards = [...cards].sort((a, b) => b.votes - a.votes)
+  const sortedCards = [...cards].sort((a, b) => b.votes - a.votes);
 
   return (
     <div className="flex-1 min-w-[280px]">
@@ -77,34 +83,50 @@ export function RetroColumn({
             >
               {editingCardId === card.id ? (
                 <div className="space-y-2">
-                  <Input
-                    value={editText}
-                    onChange={(e) => setEditText(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') saveEdit(card.id)
-                      if (e.key === 'Escape') cancelEdit()
-                    }}
-                    autoFocus
-                  />
+                  <div>
+                    <div className="rounded-md overflow-hidden border border-input focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                      <Textarea
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                            e.preventDefault();
+                            saveEdit(card.id);
+                          }
+                          if (e.key === "Escape") cancelEdit();
+                        }}
+                        autoFocus
+                        className="min-h-[60px] bg-white border-0 focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1 mt-1">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Info className="h-3 w-3 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Press ⌘+Enter or Ctrl+Enter to save</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                      <p className="text-xs text-muted-foreground">
+                        ⌘+Enter or Ctrl+Enter to save
+                      </p>
+                    </div>
+                  </div>
                   <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      onClick={() => saveEdit(card.id)}
-                    >
+                    <Button size="sm" onClick={() => saveEdit(card.id)}>
                       <Check className="h-4 w-4" />
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={cancelEdit}
-                    >
+                    <Button size="sm" variant="ghost" onClick={cancelEdit}>
                       <X className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
               ) : (
                 <>
-                  <p className="text-sm">{card.text}</p>
+                  <p className="text-sm whitespace-pre-wrap">{card.text}</p>
                   <div className="flex items-center justify-between">
                     <Button
                       variant="ghost"
@@ -141,13 +163,38 @@ export function RetroColumn({
 
           {isAdding ? (
             <div className="space-y-2">
-              <Input
-                value={newCardText}
-                onChange={(e) => setNewCardText(e.target.value)}
-                placeholder="Enter your thought..."
-                onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-                autoFocus
-              />
+              <div>
+                <div className="rounded-md overflow-hidden border border-input focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                  <Textarea
+                    value={newCardText}
+                    onChange={(e) => setNewCardText(e.target.value)}
+                    placeholder="Enter your thought..."
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                        e.preventDefault();
+                        handleAdd();
+                      }
+                    }}
+                    autoFocus
+                    className="min-h-[60px] bg-white border-0 focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full"
+                  />
+                </div>
+                <div className="flex items-center gap-1 mt-1">
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Info className="h-3 w-3 text-muted-foreground" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Press ⌘+Enter or Ctrl+Enter to add</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <p className="text-xs text-muted-foreground">
+                    ⌘+Enter or Ctrl+Enter to add
+                  </p>
+                </div>
+              </div>
               <div className="flex gap-2">
                 <Button size="sm" onClick={handleAdd}>
                   Add
@@ -156,8 +203,8 @@ export function RetroColumn({
                   size="sm"
                   variant="ghost"
                   onClick={() => {
-                    setIsAdding(false)
-                    setNewCardText('')
+                    setIsAdding(false);
+                    setNewCardText("");
                   }}
                 >
                   Cancel
@@ -177,5 +224,5 @@ export function RetroColumn({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

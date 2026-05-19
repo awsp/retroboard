@@ -29,10 +29,6 @@ export function ResetBoardDialog({
     setError("");
   };
 
-  const handleError = (message: string) => {
-    setError(message);
-  };
-
   const handleCancel = () => {
     setPassword("");
     setError("");
