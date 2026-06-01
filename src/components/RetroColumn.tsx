@@ -206,7 +206,7 @@ export function RetroColumn({
             <div className="relative rounded-md overflow-hidden">
               <Button
                 variant="outline"
-                className="w-full"
+                className="w-full transition-all duration-200 hover:bg-gray-100/50 hover:shadow-sm"
                 onClick={() => setIsAdding(true)}
               >
                 <Plus className="h-4 w-4 mr-2" />
