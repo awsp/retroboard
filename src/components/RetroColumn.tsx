@@ -80,7 +80,7 @@ export function RetroColumn({
           {sortedCards.map((card) => (
             <div
               key={card.id}
-              className="p-3 bg-secondary rounded-md space-y-2 group"
+              className="p-3 bg-secondary/40 backdrop-blur-[3px] rounded-md space-y-2 group"
             >
               {editingCardId === card.id ? (
                 <div className="space-y-2">
@@ -214,7 +214,7 @@ export function RetroColumn({
               </Button>
               <BorderBeam
                 size={60}
-                duration={5}
+                duration={12}
                 delay={0}
                 colorFrom="#fcc5e4"
                 colorTo="#c7d2fe"

@@ -8,6 +8,7 @@ import { Toaster, toast } from "sonner";
 import { ExportDialog } from "./components/ExportDialog";
 import { ResetBoardDialog } from "./components/ResetBoardDialog";
 import { ThemeToggle } from "./components/ThemeToggle";
+import { Meteors } from "./components/ui/meteors";
 import {
   downloadHTML,
   generateHTMLReport,
@@ -130,8 +131,9 @@ function App() {
         onClose={() => setIsResetDialogOpen(false)}
         onConfirm={handleResetBoard}
       />
-      <div className="min-h-screen bg-background p-6">
-        <div className="mx-auto space-y-6">
+      <div className="relative min-h-screen overflow-hidden bg-background p-6">
+        <Meteors number={20} />
+        <div className="relative z-10 mx-auto space-y-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-4xl font-bold tracking-tight">
