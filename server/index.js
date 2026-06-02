@@ -3,6 +3,7 @@ import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
+import { COLUMN_DEFINITIONS } from "../shared/columnConfig.js";
 
 const app = express();
 app.use(cors());
@@ -15,28 +16,18 @@ const io = new Server(httpServer, {
   },
 });
 
-let boardState = {
-  wentWell: {
-    title: "What Went Well",
-    color: "border-t-green-500",
-    cards: [],
-  },
-  toImprove: {
-    title: "What Could Be Improved",
-    color: "border-t-yellow-500",
-    cards: [],
-  },
-  actionItems: {
-    title: "Action Items",
-    color: "border-t-blue-500",
-    cards: [],
-  },
-  kudos: {
-    title: "Kudos",
-    color: "border-t-purple-500",
-    cards: [],
-  },
+const createInitialBoardState = () => {
+  const state = {};
+  for (const [key, config] of Object.entries(COLUMN_DEFINITIONS)) {
+    state[key] = {
+      ...config,
+      cards: [],
+    };
+  }
+  return state;
 };
+
+let boardState = createInitialBoardState();
 
 let connectedUsers = 0;
 
@@ -125,28 +116,7 @@ io.on("connection", (socket) => {
       return;
     }
 
-    boardState = {
-      wentWell: {
-        title: "What Went Well",
-        color: "border-t-green-500",
-        cards: [],
-      },
-      toImprove: {
-        title: "What Could Be Improved",
-        color: "border-t-yellow-500",
-        cards: [],
-      },
-      actionItems: {
-        title: "Action Items",
-        color: "border-t-blue-500",
-        cards: [],
-      },
-      kudos: {
-        title: "Kudos",
-        color: "border-t-purple-500",
-        cards: [],
-      },
-    };
+    boardState = createInitialBoardState();
     io.emit("board-state", boardState);
     socket.emit("reset-board-success");
   });

@@ -14,6 +14,7 @@ import {
   generateHTMLReport,
   sanitizeFilename,
 } from "./lib/exportUtils";
+import { COLUMN_DEFINITIONS } from "../shared/columnConfig.js";
 
 export interface ColumnData {
   title: string;
@@ -22,27 +23,15 @@ export interface ColumnData {
 }
 
 function App() {
-  const [columns, setColumns] = useState<Record<string, ColumnData>>({
-    wentWell: {
-      title: "What Went Well",
-      color: "border-t-green-500",
-      cards: [],
-    },
-    toImprove: {
-      title: "What Could Be Improved",
-      color: "border-t-yellow-500",
-      cards: [],
-    },
-    actionItems: {
-      title: "Action Items",
-      color: "border-t-blue-500",
-      cards: [],
-    },
-    kudos: {
-      title: "Kudos",
-      color: "border-t-purple-500",
-      cards: [],
-    },
+  const [columns, setColumns] = useState<Record<string, ColumnData>>(() => {
+    const initialColumns: Record<string, ColumnData> = {};
+    for (const [key, config] of Object.entries(COLUMN_DEFINITIONS)) {
+      initialColumns[key] = {
+        ...config,
+        cards: [],
+      };
+    }
+    return initialColumns;
   });
   const [socket, setSocket] = useState<Socket | null>(null);
   const [userCount, setUserCount] = useState(0);
@@ -132,7 +121,7 @@ function App() {
         onConfirm={handleResetBoard}
       />
       <div className="relative min-h-screen overflow-hidden bg-background p-6">
-        <Meteors number={20} />
+        <Meteors number={18} />
         <div className="relative z-10 mx-auto space-y-6">
           <div className="flex items-center justify-between">
             <div>

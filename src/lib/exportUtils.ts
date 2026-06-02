@@ -1,59 +1,65 @@
-import { ColumnData } from '../App'
+import { ColumnData } from "../App";
 
 export const sanitizeFilename = (name: string): string => {
   return name
     .trim()
-    .replace(/[^a-z0-9]/gi, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-    .toLowerCase()
-}
+    .replace(/[^a-z0-9]/gi, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .toLowerCase();
+};
+
+const tailwindToHex = (tailwindClass: string): string => {
+  const colorMap: Record<string, string> = {
+    "border-t-green-500": "#22c55e",
+    "border-t-yellow-500": "#eab308",
+    "border-t-blue-500": "#3b82f6",
+    "border-t-purple-500": "#a855f7",
+  };
+  return colorMap[tailwindClass] || "#64748b";
+};
 
 export const generateHTMLReport = (
   columns: Record<string, ColumnData>,
   reportName: string,
-  date: string
+  date: string,
 ): string => {
-  const columnColors = {
-    'wentWell': '#22c55e',
-    'toImprove': '#eab308',
-    'actionItems': '#3b82f6',
-    'kudos': '#a855f7'
-  }
-
-  const totalCards = Object.values(columns).reduce((sum, col) => sum + col.cards.length, 0)
+  const totalCards = Object.values(columns).reduce(
+    (sum, col) => sum + col.cards.length,
+    0,
+  );
   const totalVotes = Object.values(columns).reduce(
     (sum, col) => sum + col.cards.reduce((s, card) => s + card.votes, 0),
-    0
-  )
+    0,
+  );
 
   const columnHTML = Object.entries(columns)
-    .map(([key, column]) => {
-      const sortedCards = [...column.cards].sort((a, b) => b.votes - a.votes)
+    .map(([_key, column]) => {
+      const sortedCards = [...column.cards].sort((a, b) => b.votes - a.votes);
       const cardsHTML = sortedCards
         .map(
           (card) => `
           <div class="card">
             <div class="card-text">${escapeHtml(card.text)}</div>
-            <div class="card-votes">👍 ${card.votes} ${card.votes === 1 ? 'vote' : 'votes'}</div>
+            <div class="card-votes">👍 ${card.votes} ${card.votes === 1 ? "vote" : "votes"}</div>
           </div>
-        `
+        `,
         )
-        .join('')
+        .join("");
 
       return `
         <div class="column">
-          <div class="column-header" style="border-top: 4px solid ${columnColors[key as keyof typeof columnColors]}">
+          <div class="column-header" style="border-top: 4px solid ${tailwindToHex(column.color)}">
             <h2>${column.title}</h2>
-            <span class="card-count">${column.cards.length} ${column.cards.length === 1 ? 'card' : 'cards'}</span>
+            <span class="card-count">${column.cards.length} ${column.cards.length === 1 ? "card" : "cards"}</span>
           </div>
           <div class="column-content">
             ${cardsHTML || '<div class="empty-column">No cards</div>'}
           </div>
         </div>
-      `
+      `;
     })
-    .join('')
+    .join("");
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -281,23 +287,23 @@ export const generateHTMLReport = (
     </div>
   </div>
 </body>
-</html>`
-}
+</html>`;
+};
 
 const escapeHtml = (text: string): string => {
-  const div = document.createElement('div')
-  div.textContent = text
-  return div.innerHTML
-}
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+};
 
 export const downloadHTML = (html: string, filename: string): void => {
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = filename
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
-}
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
