@@ -28,8 +28,8 @@ export const Meteors = ({ number = 20, className }: MeteorsProps) => {
         baseDuration < 4
           ? Math.random() * 2 + 2
           : baseDuration > 5.4
-            ? Math.random() * 1.7 + 3.4
-            : Math.random() * 2 + 4;
+            ? Math.random() * 1.275 + 2.55
+            : (Math.random() * 2 + 4) * 0.9;
 
       const pauseDuration = Math.random() * 5 + 3;
       duration = dropDuration + pauseDuration;
@@ -60,7 +60,7 @@ export const Meteors = ({ number = 20, className }: MeteorsProps) => {
             Math.floor(Math.random() * (window.innerHeight / 2) + noiseY) +
             "px",
           left: Math.floor(Math.random() * window.innerWidth + noiseX) + "px",
-          animationDelay: Math.random() * 10 + 2 + "s",
+          animationDelay: Math.random() * dropDuration + "s",
           animationDuration: duration + "s",
           animationTimingFunction: easingCurve,
         },

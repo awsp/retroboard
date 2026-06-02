@@ -177,12 +177,12 @@
 
 @layer utilities {
   .animate-meteor-fast {
-    animation: meteor-fast cubic-bezier(0.55, 0, 0.45, 1) infinite;
+    animation: meteor-fast cubic-bezier(0.55, 0, 0.45, 1) infinite both;
   }
   .animate-meteor-medium {
-    animation: meteor-medium cubic-bezier(0.55, 0, 0.45, 1) infinite;
+    animation: meteor-medium cubic-bezier(0.55, 0, 0.45, 1) infinite both;
   }
   .animate-meteor-slow {
-    animation: meteor-slow cubic-bezier(0.55, 0, 0.45, 1) infinite;
+    animation: meteor-slow cubic-bezier(0.55, 0, 0.45, 1) infinite both;
   }
 }
