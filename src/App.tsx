@@ -7,6 +7,7 @@ import Timer from "@/components/Timer.tsx";
 import { Toaster, toast } from "sonner";
 import { ExportDialog } from "./components/ExportDialog";
 import { ResetBoardDialog } from "./components/ResetBoardDialog";
+import { ThemeToggle } from "./components/ThemeToggle";
 import {
   downloadHTML,
   generateHTMLReport,
@@ -150,6 +151,7 @@ function App() {
               </div>
               <Timer socket={socket} />
               <div className="flex gap-2">
+                <ThemeToggle />
                 <Button
                   variant="outline"
                   onClick={() => setIsExportDialogOpen(true)}
