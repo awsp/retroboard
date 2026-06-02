@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface MeteorsProps {
@@ -28,7 +28,7 @@ export const Meteors = ({ number = 20, className }: MeteorsProps) => {
         baseDuration < 4
           ? Math.random() * 2 + 2
           : baseDuration > 5.4
-            ? Math.random() * 1.275 + 2.55
+            ? Math.random() * 0.7171875 + 1.434375
             : (Math.random() * 2 + 4) * 0.9;
 
       const pauseDuration = Math.random() * 5 + 3;
