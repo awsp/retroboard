@@ -11,6 +11,7 @@ import {
 import { Plus, Trash2, ThumbsUp, Pencil, Check, X, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BorderBeam } from "./ui/border-beam";
+import { MagicCard } from "./ui/magic-card";
 
 export interface RetroCard {
   id: string;
@@ -102,81 +103,88 @@ export function RetroColumn({
         </CardHeader>
         <CardContent className="space-y-3">
           {sortedCards.map((card) => (
-            <div
+            <MagicCard
               key={card.id}
-              className="p-3 backdrop-blur-[3px] rounded-md space-y-2 group relative overflow-hidden"
-              style={{
-                background: getCardColor(),
-              }}
+              gradientSize={300}
+              gradientColor={getCardColor()}
+              gradientOpacity={0.6}
+              className="rounded-md"
             >
-              {editingCardId === card.id ? (
-                <div className="space-y-2">
-                  <div>
-                    <div className="rounded-md overflow-hidden border border-input focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-                      <Textarea
-                        value={editText}
-                        onChange={(e) => setEditText(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-                            e.preventDefault();
-                            saveEdit(card.id);
-                          }
-                          if (e.key === "Escape") cancelEdit();
-                        }}
-                        autoFocus
-                        className="min-h-[60px] bg-white border-0 focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full"
-                      />
+              <div
+                className="p-3 backdrop-blur-[3px] rounded-md space-y-2 group relative overflow-hidden"
+                style={{
+                  background: getCardColor(),
+                }}
+              >
+                {editingCardId === card.id ? (
+                  <div className="space-y-2">
+                    <div>
+                      <div className="rounded-md overflow-hidden border border-input focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                        <Textarea
+                          value={editText}
+                          onChange={(e) => setEditText(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                              e.preventDefault();
+                              saveEdit(card.id);
+                            }
+                            if (e.key === "Escape") cancelEdit();
+                          }}
+                          autoFocus
+                          className="min-h-[60px] bg-white border-0 focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-thumb]:rounded-full"
+                        />
+                      </div>
+                      <div className="flex items-center gap-1 mt-2">
+                        <p className="text-xs text-muted-foreground">
+                          ⌘+Enter or Ctrl+Enter to save
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1 mt-2">
-                      <p className="text-xs text-muted-foreground">
-                        ⌘+Enter or Ctrl+Enter to save
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={() => saveEdit(card.id)}>
-                      <Check className="h-4 w-4" />
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={cancelEdit}>
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <p className="text-sm whitespace-pre-wrap">{card.text}</p>
-                  <div className="flex items-center justify-between">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onVote(card.id)}
-                      className="gap-1"
-                    >
-                      <ThumbsUp className="h-4 w-4" />
-                      <span className="text-xs">{card.votes}</span>
-                    </Button>
-                    <div className="flex gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => startEdit(card)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
-                      >
-                        <Pencil className="h-4 w-4" />
+                    <div className="flex gap-2">
+                      <Button size="sm" onClick={() => saveEdit(card.id)}>
+                        <Check className="h-4 w-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => onDeleteCard(card.id)}
-                        className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
-                      >
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                      <Button size="sm" variant="ghost" onClick={cancelEdit}>
+                        <X className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
-                </>
-              )}
-            </div>
+                ) : (
+                  <>
+                    <p className="text-sm whitespace-pre-wrap">{card.text}</p>
+                    <div className="flex items-center justify-between">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onVote(card.id)}
+                        className="gap-1"
+                      >
+                        <ThumbsUp className="h-4 w-4" />
+                        <span className="text-xs">{card.votes}</span>
+                      </Button>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => startEdit(card)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => onDeleteCard(card.id)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </MagicCard>
           ))}
 
           {isAdding ? (
