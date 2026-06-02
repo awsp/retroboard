@@ -121,7 +121,7 @@ function App() {
         onConfirm={handleResetBoard}
       />
       <div className="relative min-h-screen overflow-hidden bg-background p-6">
-        <Meteors number={3} />
+        <Meteors number={4} />
         <div className="relative z-10 mx-auto space-y-6">
           <div className="flex items-center justify-between">
             <div>
