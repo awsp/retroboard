@@ -1,5 +1,5 @@
 import {Input} from '@/components/ui/input.tsx';
-import {useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Button} from '@/components/ui/button.tsx';
 import {Switch} from '@/components/ui/switch.tsx';
 import {Socket} from 'socket.io-client';
