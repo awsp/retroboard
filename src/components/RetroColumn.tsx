@@ -70,8 +70,32 @@ export function RetroColumn({
 
   const sortedCards = [...cards].sort((a, b) => b.votes - a.votes);
 
+  const getGlowColor = () => {
+    if (color.includes("green")) return "rgba(34, 197, 94, 0.25)";
+    if (color.includes("yellow")) return "rgba(234, 179, 8, 0.25)";
+    if (color.includes("blue")) return "rgba(59, 130, 246, 0.25)";
+    if (color.includes("purple")) return "rgba(168, 85, 247, 0.25)";
+    return "rgba(100, 100, 100, 0.3)";
+  };
+
+  const getCardColor = () => {
+    if (color.includes("green")) return "rgba(34, 197, 94, 0.15)";
+    if (color.includes("yellow")) return "rgba(234, 179, 8, 0.15)";
+    if (color.includes("blue")) return "rgba(59, 130, 246, 0.15)";
+    if (color.includes("purple")) return "rgba(168, 85, 247, 0.15)";
+    return "rgba(100, 100, 100, 0.15)";
+  };
+
   return (
-    <div className="flex-1 min-w-[280px]">
+    <div className="flex-1 min-w-[280px] relative">
+      <div
+        className="absolute inset-0 -z-10 rounded-lg"
+        style={{
+          background: getGlowColor(),
+          filter: "blur(40px)",
+          opacity: 0.6,
+        }}
+      />
       <Card className={cn("h-full border-t-4", color)}>
         <CardHeader>
           <CardTitle className="text-lg">{title}</CardTitle>
@@ -80,7 +104,10 @@ export function RetroColumn({
           {sortedCards.map((card) => (
             <div
               key={card.id}
-              className="p-3 bg-secondary/40 backdrop-blur-[3px] rounded-md space-y-2 group"
+              className="p-3 backdrop-blur-[3px] rounded-md space-y-2 group relative overflow-hidden"
+              style={{
+                background: getCardColor(),
+              }}
             >
               {editingCardId === card.id ? (
                 <div className="space-y-2">
