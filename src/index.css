@@ -58,22 +58,131 @@
   }
 }
 
-@keyframes meteor {
+@keyframes meteor-fast {
   0% {
     transform: rotate(215deg) translateX(0);
-    opacity: 1;
+    opacity: 0;
   }
-  70% {
-    opacity: 1;
+  2% {
+    opacity: 0.4;
+  }
+  20% {
+    opacity: 0.4;
+  }
+  40% {
+    transform: rotate(215deg) translateX(-1000px);
+    opacity: 0;
   }
   100% {
-    transform: rotate(215deg) translateX(-500px);
+    transform: rotate(215deg) translateX(-1000px);
     opacity: 0;
   }
 }
 
+@keyframes meteor-medium {
+  0% {
+    transform: rotate(215deg) translateX(0);
+    opacity: 0;
+  }
+  2% {
+    opacity: 0.7;
+  }
+  30% {
+    opacity: 0.7;
+  }
+  48% {
+    transform: rotate(215deg) translateX(-800px);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(215deg) translateX(-800px);
+    opacity: 0;
+  }
+}
+
+@keyframes meteor-slow {
+  0% {
+    transform: rotate(215deg) translateX(0);
+    opacity: 0;
+  }
+  2% {
+    opacity: 1;
+  }
+  35% {
+    opacity: 1;
+  }
+  50% {
+    transform: rotate(215deg) translateX(-600px);
+    opacity: 0;
+  }
+  100% {
+    transform: rotate(215deg) translateX(-600px);
+    opacity: 0;
+  }
+}
+
+@keyframes meteor-trail-fast {
+  0% {
+    transform: scaleX(0.01);
+  }
+  12% {
+    transform: scaleX(1);
+  }
+  32% {
+    transform: scaleX(1);
+  }
+  40% {
+    transform: scaleX(0.01);
+  }
+  100% {
+    transform: scaleX(0.01);
+  }
+}
+
+@keyframes meteor-trail-medium {
+  0% {
+    transform: scaleX(0.01);
+  }
+  12% {
+    transform: scaleX(1);
+  }
+  42% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(0.01);
+  }
+  100% {
+    transform: scaleX(0.01);
+  }
+}
+
+@keyframes meteor-trail-slow {
+  0% {
+    transform: scaleX(0.01);
+  }
+  7% {
+    transform: scaleX(1);
+  }
+  46% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(0.01);
+  }
+  100% {
+    transform: scaleX(0.01);
+  }
+}
+
 @layer utilities {
-  .animate-meteor {
-    animation: meteor linear infinite;
+  .animate-meteor-fast {
+    animation: meteor-fast cubic-bezier(0.55, 0, 0.45, 1) infinite;
+  }
+  .animate-meteor-medium {
+    animation: meteor-medium cubic-bezier(0.55, 0, 0.45, 1) infinite;
+  }
+  .animate-meteor-slow {
+    animation: meteor-slow cubic-bezier(0.55, 0, 0.45, 1) infinite;
   }
 }
