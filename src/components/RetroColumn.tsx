@@ -42,6 +42,7 @@ export function RetroColumn({
   const [isAdding, setIsAdding] = useState(false);
   const [editingCardId, setEditingCardId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
+  const [isAddHovered, setIsAddHovered] = useState(false);
 
   const handleAdd = () => {
     if (newCardText.trim()) {
@@ -238,7 +239,13 @@ export function RetroColumn({
               </div>
             </div>
           ) : (
-            <div className="relative rounded-md overflow-hidden">
+            <div
+              className="relative rounded-md overflow-hidden"
+              onMouseEnter={() => setIsAddHovered(true)}
+              onMouseLeave={() => setIsAddHovered(false)}
+              onFocus={() => setIsAddHovered(true)}
+              onBlur={() => setIsAddHovered(false)}
+            >
               <Button
                 variant="outline"
                 className="w-full transition-all duration-200 hover:bg-gray-100/50 hover:shadow-sm"
@@ -247,14 +254,16 @@ export function RetroColumn({
                 <Plus className="h-4 w-4 mr-2" />
                 Add Card
               </Button>
-              <BorderBeam
-                size={60}
-                duration={12}
-                delay={0}
-                colorFrom="#fcc5e4"
-                colorTo="#c7d2fe"
-                borderWidth={2}
-              />
+              {isAddHovered && (
+                <BorderBeam
+                  size={60}
+                  duration={12}
+                  delay={0}
+                  colorFrom="#fcc5e4"
+                  colorTo="#c7d2fe"
+                  borderWidth={2}
+                />
+              )}
             </div>
           )}
         </CardContent>
