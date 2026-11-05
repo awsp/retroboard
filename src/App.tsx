@@ -1,14 +1,19 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { RetroCard, RetroColumn } from "./components/RetroColumn";
 import { Button } from "./components/ui/button";
-import { Download, RotateCcw, Users } from "lucide-react";
+import { Download, RotateCcw, Sticker, Users } from "lucide-react";
 import Timer from "@/components/Timer.tsx";
 import { Toaster, toast } from "sonner";
 import { ExportDialog } from "./components/ExportDialog";
 import { ResetBoardDialog } from "./components/ResetBoardDialog";
 import { ThemeToggle } from "./components/ThemeToggle";
 import { Meteors } from "./components/ui/meteors";
+import {
+  StickerPanel,
+  type StickerDrop,
+  type StickerMove,
+} from "./components/Stickers";
 import {
   downloadHTML,
   generateHTMLReport,
@@ -38,6 +43,7 @@ function App() {
   const [isConnected, setIsConnected] = useState(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+  const [isStickerPanelOpen, setIsStickerPanelOpen] = useState(false);
 
   useEffect(() => {
     const socketUrl =
@@ -96,6 +102,31 @@ function App() {
     socket?.emit("edit-card", { columnKey, cardId, newText });
   };
 
+  const placeSticker = (columnKey: string, cardId: string, drop: StickerDrop) => {
+    socket?.emit("place-sticker", { columnKey, cardId, ...drop });
+  };
+
+  const moveSticker = (
+    toColumnKey: string,
+    toCardId: string,
+    move: StickerMove,
+  ) => {
+    socket?.emit("move-sticker", { ...move, toColumnKey, toCardId });
+  };
+
+  const removeSticker = (
+    columnKey: string,
+    cardId: string,
+    placementId: string,
+  ) => {
+    socket?.emit("remove-sticker", { columnKey, cardId, placementId });
+  };
+
+  const closeStickerPanel = useCallback(
+    () => setIsStickerPanelOpen(false),
+    [],
+  );
+
   const handleResetBoard = (password: string) => {
     socket?.emit("reset-board", { password });
   };
@@ -115,6 +146,9 @@ function App() {
         onClose={() => setIsExportDialogOpen(false)}
         onConfirm={handleExport}
       />
+      {isStickerPanelOpen && (
+        <StickerPanel onClose={closeStickerPanel} />
+      )}
       <ResetBoardDialog
         isOpen={isResetDialogOpen}
         onClose={() => setIsResetDialogOpen(false)}
@@ -143,6 +177,15 @@ function App() {
               <Timer socket={socket} />
               <div className="flex gap-2">
                 <ThemeToggle />
+                <Button
+                  variant={isStickerPanelOpen ? "default" : "outline"}
+                  onClick={() => setIsStickerPanelOpen((open) => !open)}
+                  aria-pressed={isStickerPanelOpen}
+                  size="sm"
+                >
+                  <Sticker className="h-4 w-4 mr-2" />
+                  Stickers
+                </Button>
                 <Button
                   variant="outline"
                   onClick={() => setIsExportDialogOpen(true)}
@@ -174,6 +217,12 @@ function App() {
                 onDeleteCard={(id) => deleteCard(key, id)}
                 onVote={(id) => voteCard(key, id)}
                 onEditCard={(id, newText) => editCard(key, id, newText)}
+                columnKey={key}
+                onPlaceSticker={(id, drop) => placeSticker(key, id, drop)}
+                onMoveSticker={(id, move) => moveSticker(key, id, move)}
+                onRemoveSticker={(id, placementId) =>
+                  removeSticker(key, id, placementId)
+                }
               />
             ))}
           </div>

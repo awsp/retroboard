@@ -1,4 +1,19 @@
 import { ColumnData } from "../App";
+import { STICKER_MAP } from "../../shared/stickers.js";
+import type { StickerPlacement } from "../components/Stickers";
+
+const renderStickers = (stickers: StickerPlacement[] = []): string => {
+  if (!Array.isArray(stickers)) return "";
+  const items = stickers
+    .filter((p) => STICKER_MAP[p.stickerId])
+    .map((p) => {
+      const sticker = STICKER_MAP[p.stickerId];
+      const style = `left:${p.x * 100}%;top:${p.y * 100}%;transform:translate(-50%,-50%) rotate(${p.rotation}deg)`;
+      return `<span class="sticker sticker-${sticker.kind}" style="${style}" title="${escapeHtml(sticker.label)}">${sticker.svg}</span>`;
+    })
+    .join("");
+  return items ? `<div class="card-stickers">${items}</div>` : "";
+};
 
 export const sanitizeFilename = (name: string): string => {
   return name
@@ -41,6 +56,7 @@ export const generateHTMLReport = (
           (card) => `
           <div class="card">
             <div class="card-text">${escapeHtml(card.text)}</div>
+            ${renderStickers(card.stickers)}
             <div class="card-votes">👍 ${card.votes} ${card.votes === 1 ? "vote" : "votes"}</div>
           </div>
         `,
@@ -194,6 +210,9 @@ export const generateHTMLReport = (
     }
     
     .card {
+      position: relative;
+      overflow: hidden;
+      min-height: 120px;
       background: #f8fafc;
       border: 1px solid #e2e8f0;
       border-radius: 6px;
@@ -212,6 +231,28 @@ export const generateHTMLReport = (
       word-wrap: break-word;
     }
     
+    .card-stickers {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .sticker {
+      position: absolute;
+      display: block;
+      filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+    }
+
+    .sticker svg {
+      display: block;
+      height: 56px;
+      width: auto;
+    }
+
+    .sticker-stamp svg {
+      height: 44px;
+    }
+
     .card-votes {
       font-size: 13px;
       color: #64748b;

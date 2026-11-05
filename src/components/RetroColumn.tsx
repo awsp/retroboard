@@ -8,18 +8,34 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "./ui/tooltip";
-import { Plus, Trash2, ThumbsUp, Pencil, Check, X, Info } from "lucide-react";
+import {
+  Plus,
+  Trash2,
+  ThumbsUp,
+  Pencil,
+  Check,
+  X,
+  Info,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BorderBeam } from "./ui/border-beam";
 import { MagicCard } from "./ui/magic-card";
+import {
+  StickerSurface,
+  type StickerDrop,
+  type StickerMove,
+  type StickerPlacement,
+} from "./Stickers";
 
 export interface RetroCard {
   id: string;
   text: string;
   votes: number;
+  stickers?: StickerPlacement[];
 }
 
 interface RetroColumnProps {
+  columnKey: string;
   title: string;
   color: string;
   cards: RetroCard[];
@@ -27,9 +43,13 @@ interface RetroColumnProps {
   onDeleteCard: (id: string) => void;
   onVote: (id: string) => void;
   onEditCard: (id: string, newText: string) => void;
+  onPlaceSticker: (cardId: string, drop: StickerDrop) => void;
+  onMoveSticker: (toCardId: string, move: StickerMove) => void;
+  onRemoveSticker: (cardId: string, placementId: string) => void;
 }
 
 export function RetroColumn({
+  columnKey,
   title,
   color,
   cards,
@@ -37,6 +57,9 @@ export function RetroColumn({
   onDeleteCard,
   onVote,
   onEditCard,
+  onPlaceSticker,
+  onMoveSticker,
+  onRemoveSticker,
 }: RetroColumnProps) {
   const [newCardText, setNewCardText] = useState("");
   const [isAdding, setIsAdding] = useState(false);
@@ -111,8 +134,16 @@ export function RetroColumn({
               gradientOpacity={0.6}
               className="rounded-md"
             >
-              <div
-                className="p-3 backdrop-blur-[3px] rounded-md space-y-2 group relative overflow-hidden"
+              <StickerSurface
+                columnKey={columnKey}
+                cardId={card.id}
+                placements={editingCardId === card.id ? [] : card.stickers}
+                onPlace={(drop) => onPlaceSticker(card.id, drop)}
+                onMove={(move) => onMoveSticker(card.id, move)}
+                onRemove={(placementId) =>
+                  onRemoveSticker(card.id, placementId)
+                }
+                className="p-3 backdrop-blur-[3px] rounded-md space-y-2 group relative overflow-hidden min-h-[120px]"
                 style={{
                   background: getCardColor(),
                 }}
@@ -153,7 +184,7 @@ export function RetroColumn({
                 ) : (
                   <>
                     <p className="text-sm whitespace-pre-wrap">{card.text}</p>
-                    <div className="flex items-center justify-between">
+                    <div className="relative z-20 flex items-center justify-between">
                       <Button
                         variant="ghost"
                         size="sm"
@@ -184,7 +215,7 @@ export function RetroColumn({
                     </div>
                   </>
                 )}
-              </div>
+              </StickerSurface>
             </MagicCard>
           ))}
 

@@ -4,6 +4,7 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 import { COLUMN_DEFINITIONS } from "../shared/columnConfig.js";
+import { STICKER_MAP, MAX_STICKERS_PER_CARD } from "../shared/stickers.js";
 
 const app = express();
 app.use(cors());
@@ -80,6 +81,7 @@ io.on("connection", (socket) => {
       id: `${columnKey}-${Date.now()}-${Math.random()}`,
       text,
       votes: 0,
+      stickers: [],
     };
     boardState[columnKey].cards.push(newCard);
     io.emit("board-state", boardState);
@@ -98,6 +100,64 @@ io.on("connection", (socket) => {
       card.votes++;
       io.emit("board-state", boardState);
     }
+  });
+
+  const findCard = (columnKey, cardId) =>
+    boardState[columnKey]?.cards.find((c) => c.id === cardId);
+
+  const placementsOf = (card) => {
+    if (!Array.isArray(card.stickers)) card.stickers = [];
+    return card.stickers;
+  };
+
+  const clampNumber = (value, min, max, fallback) => {
+    const n = Number(value);
+    return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : fallback;
+  };
+
+  // Sticker positions are fractions (0..1) of the card's width/height so they
+  // stay put regardless of screen size or card re-ordering.
+  socket.on("place-sticker", ({ columnKey, cardId, stickerId, x, y, rotation }) => {
+    const card = findCard(columnKey, cardId);
+    if (!card || !Object.hasOwn(STICKER_MAP, stickerId)) return;
+    const placements = placementsOf(card);
+    if (placements.length >= MAX_STICKERS_PER_CARD) return;
+    placements.push({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      stickerId,
+      x: clampNumber(x, 0, 1, 0.5),
+      y: clampNumber(y, 0, 1, 0.5),
+      rotation: clampNumber(rotation, -30, 30, 0),
+    });
+    io.emit("board-state", boardState);
+  });
+
+  socket.on(
+    "move-sticker",
+    ({ fromColumnKey, fromCardId, placementId, toColumnKey, toCardId, x, y }) => {
+      const from = findCard(fromColumnKey, fromCardId);
+      const to = findCard(toColumnKey, toCardId);
+      if (!from || !to) return;
+      const fromPlacements = placementsOf(from);
+      const index = fromPlacements.findIndex((p) => p.id === placementId);
+      if (index === -1) return;
+      if (from !== to && placementsOf(to).length >= MAX_STICKERS_PER_CARD) return;
+      const [placement] = fromPlacements.splice(index, 1);
+      placement.x = clampNumber(x, 0, 1, placement.x);
+      placement.y = clampNumber(y, 0, 1, placement.y);
+      placementsOf(to).push(placement); // last in the list renders on top
+      io.emit("board-state", boardState);
+    },
+  );
+
+  socket.on("remove-sticker", ({ columnKey, cardId, placementId }) => {
+    const card = findCard(columnKey, cardId);
+    if (!card) return;
+    const placements = placementsOf(card);
+    const index = placements.findIndex((p) => p.id === placementId);
+    if (index === -1) return;
+    placements.splice(index, 1);
+    io.emit("board-state", boardState);
   });
 
   socket.on("edit-card", ({ columnKey, cardId, newText }) => {
@@ -156,7 +216,7 @@ io.on("connection", (socket) => {
   });
 });
 
-const PORT = 3001;
+const PORT = Number(process.env.PORT) || 3001;
 httpServer.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on http://0.0.0.0:${PORT}`);
   console.log(`Access from network at http://<your-ip>:${PORT}`);
