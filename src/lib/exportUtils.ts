@@ -181,10 +181,10 @@ export const generateHTMLReport = (
       background: white;
       border: 1px solid #e2e8f0;
       border-radius: 8px;
-      overflow: hidden;
     }
     
     .column-header {
+      border-radius: 8px 8px 0 0;
       padding: 20px;
       background: #f8fafc;
       border-bottom: 1px solid #e2e8f0;
@@ -211,7 +211,6 @@ export const generateHTMLReport = (
     
     .card {
       position: relative;
-      overflow: hidden;
       min-height: 120px;
       background: #f8fafc;
       border: 1px solid #e2e8f0;
@@ -234,13 +233,14 @@ export const generateHTMLReport = (
     .card-stickers {
       position: absolute;
       inset: 0;
+      z-index: 2;
       pointer-events: none;
     }
 
     .sticker {
       position: absolute;
       display: block;
-      filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
+      filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.15));
     }
 
     .sticker svg {

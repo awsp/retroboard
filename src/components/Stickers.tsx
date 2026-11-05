@@ -78,7 +78,7 @@ function StickerImage({
       alt={sticker.label}
       draggable={false}
       className={cn(
-        "w-auto select-none drop-shadow-[0_2px_3px_rgba(0,0,0,0.35)]",
+        "w-auto max-w-none select-none drop-shadow-[0_1px_1.5px_rgba(0,0,0,0.15)]",
         SIZE[size][sticker.kind],
         className,
       )}
@@ -110,17 +110,7 @@ const readPayload = (e: DragEvent): DragPayload | null => {
   }
 };
 
-// Rendered size (px) of a sticker on a card; matches SIZE.card (h-14 / h-11).
-const placedSize = (sticker: StickerDefinition) =>
-  sticker.kind === "stamp"
-    ? { width: 44 * (120 / 56), height: 44 }
-    : { width: 56, height: 56 };
-
-/** Fraction along an axis that keeps a sticker of `size` px fully inside `length` px. */
-const clampInside = (pos: number, size: number, length: number) => {
-  const half = Math.min(0.5, size / 2 / length);
-  return Math.min(1 - half, Math.max(half, pos / length));
-};
+const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
 const randomTilt = () => Math.round(Math.random() * 24 - 12);
 
@@ -132,7 +122,8 @@ interface StickerSurfaceProps {
   onMove: (move: StickerMove) => void;
   onRemove: (placementId: string) => void;
   className?: string;
-  style?: CSSProperties;
+  /** Card tint. Drawn on its own layer so the card itself doesn't clip or trap stickers. */
+  background?: string;
   children: ReactNode;
 }
 
@@ -145,7 +136,7 @@ export function StickerSurface({
   onMove,
   onRemove,
   className,
-  style,
+  background,
   children,
 }: StickerSurfaceProps) {
   const [isOver, setIsOver] = useState(false);
@@ -170,9 +161,9 @@ export function StickerSurface({
     if (!payload) return;
     e.preventDefault();
     const rect = e.currentTarget.getBoundingClientRect();
-    const size = placedSize(STICKER_MAP[payload.stickerId]);
-    const x = clampInside(e.clientX - payload.offsetX - rect.left, size.width, rect.width);
-    const y = clampInside(e.clientY - payload.offsetY - rect.top, size.height, rect.height);
+    // Only the sticker's centre must land on the card, so it can hang over the edge.
+    const x = clamp01((e.clientX - payload.offsetX - rect.left) / rect.width);
+    const y = clamp01((e.clientY - payload.offsetY - rect.top) / rect.height);
 
     if (payload.type === "new") {
       onPlace({ stickerId: payload.stickerId, x, y, rotation: randomTilt() });
@@ -198,14 +189,23 @@ export function StickerSurface({
         "transition-shadow",
         isOver && "ring-2 ring-inset ring-primary",
       )}
-      style={style}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      {children}
+      {/* Tint + blur live on a sibling layer: backdrop-filter or overflow on the
+          card itself would create a stacking context and clip stickers that hang
+          over the edge (or let the next card paint over them). */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 rounded-[inherit] backdrop-blur-[3px]"
+        style={{ background }}
+      />
+      <div className="relative space-y-2">{children}</div>
       {validPlacements.length > 0 && (
-        <div className="pointer-events-none absolute inset-0 z-10">
+        // z-30: above the card's hover glow and neighbouring cards; the card's
+        // action buttons use z-40 so they stay clickable.
+        <div className="pointer-events-none absolute inset-0 z-30">
           {validPlacements.map((placement) => (
             <PlacedSticker
               key={placement.id}
@@ -253,7 +253,7 @@ function PlacedSticker({
       onDragEnd={() => setIsDragging(false)}
       title={`${sticker.label} — drag to move`}
       className={cn(
-        "group/sticker pointer-events-auto absolute cursor-grab active:cursor-grabbing",
+        "group/sticker pointer-events-auto absolute w-max cursor-grab active:cursor-grabbing",
         isDragging && "opacity-30",
       )}
       style={{

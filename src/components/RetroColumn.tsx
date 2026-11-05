@@ -143,10 +143,8 @@ export function RetroColumn({
                 onRemove={(placementId) =>
                   onRemoveSticker(card.id, placementId)
                 }
-                className="p-3 backdrop-blur-[3px] rounded-md space-y-2 group relative overflow-hidden min-h-[120px]"
-                style={{
-                  background: getCardColor(),
-                }}
+                className="p-3 rounded-md group relative min-h-[120px]"
+                background={getCardColor()}
               >
                 {editingCardId === card.id ? (
                   <div className="space-y-2">
@@ -184,7 +182,7 @@ export function RetroColumn({
                 ) : (
                   <>
                     <p className="text-sm whitespace-pre-wrap">{card.text}</p>
-                    <div className="relative z-20 flex items-center justify-between">
+                    <div className="relative z-40 flex items-center justify-between">
                       <Button
                         variant="ghost"
                         size="sm"
