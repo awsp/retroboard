@@ -115,6 +115,21 @@ const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
 const randomTilt = () => Math.round(Math.random() * 24 - 12);
 
+// Cards grow taller as stickers pile up. Placements are stored as fractions of
+// the card, so a taller card spreads its stickers out instead of stacking them.
+const CARD_BASE_MIN_HEIGHT = 120;
+const STICKERS_BEFORE_GROWTH = 3;
+const GROWTH_PER_STICKER = 32;
+const CARD_MAX_MIN_HEIGHT = 480;
+
+/** Minimum card height in px for a card carrying `count` stickers. */
+export const stickerCardMinHeight = (count: number) =>
+  Math.min(
+    CARD_MAX_MIN_HEIGHT,
+    CARD_BASE_MIN_HEIGHT +
+      Math.max(0, count - STICKERS_BEFORE_GROWTH) * GROWTH_PER_STICKER,
+  );
+
 interface StickerSurfaceProps {
   columnKey: string;
   cardId: string;
@@ -187,9 +202,10 @@ export function StickerSurface({
     <div
       className={cn(
         className,
-        "transition-shadow",
+        "transition-[box-shadow,min-height] duration-300",
         isOver && "ring-2 ring-inset ring-primary",
       )}
+      style={{ minHeight: stickerCardMinHeight(validPlacements.length) }}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}

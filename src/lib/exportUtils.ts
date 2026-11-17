@@ -1,6 +1,9 @@
 import { ColumnData } from "../App";
 import { STICKER_MAP } from "../../shared/stickers.js";
-import type { StickerPlacement } from "../components/Stickers";
+import {
+  stickerCardMinHeight,
+  type StickerPlacement,
+} from "../components/Stickers";
 
 const renderStickers = (stickers: StickerPlacement[] = []): string => {
   if (!Array.isArray(stickers)) return "";
@@ -14,6 +17,11 @@ const renderStickers = (stickers: StickerPlacement[] = []): string => {
     .join("");
   return items ? `<div class="card-stickers">${items}</div>` : "";
 };
+
+const countStickers = (stickers: StickerPlacement[] = []): number =>
+  Array.isArray(stickers)
+    ? stickers.filter((p) => STICKER_MAP[p.stickerId]).length
+    : 0;
 
 export const sanitizeFilename = (name: string): string => {
   return name
@@ -54,7 +62,7 @@ export const generateHTMLReport = (
       const cardsHTML = sortedCards
         .map(
           (card) => `
-          <div class="card">
+          <div class="card" style="min-height:${stickerCardMinHeight(countStickers(card.stickers))}px">
             <div class="card-text">${escapeHtml(card.text)}</div>
             ${renderStickers(card.stickers)}
             <div class="card-votes">👍 ${card.votes} ${card.votes === 1 ? "vote" : "votes"}</div>
