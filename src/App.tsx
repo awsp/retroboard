@@ -44,6 +44,8 @@ function App() {
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [isStickerPanelOpen, setIsStickerPanelOpen] = useState(false);
+  // Space covered by the sticker panel, so the board can be scrolled clear of it.
+  const [stickerPanelHeight, setStickerPanelHeight] = useState(0);
 
   useEffect(() => {
     // In dev the socket server runs beside Vite on :3001; in a production
@@ -151,13 +153,27 @@ function App() {
         onClose={() => setIsExportDialogOpen(false)}
         onConfirm={handleExport}
       />
-      {isStickerPanelOpen && <StickerPanel onClose={closeStickerPanel} />}
+      {isStickerPanelOpen && (
+        <StickerPanel
+          onClose={closeStickerPanel}
+          onHeightChange={setStickerPanelHeight}
+        />
+      )}
       <ResetBoardDialog
         isOpen={isResetDialogOpen}
         onClose={() => setIsResetDialogOpen(false)}
         onConfirm={handleResetBoard}
       />
-      <div className="relative min-h-screen overflow-hidden bg-background p-6">
+      <div
+        className="relative min-h-screen overflow-hidden bg-background p-6"
+        // Extend the board's end past the sticker panel so the last cards can
+        // be scrolled above it and stay reachable as drop targets.
+        style={
+          stickerPanelHeight > 0
+            ? { paddingBottom: stickerPanelHeight + 24 }
+            : undefined
+        }
+      >
         <Meteors number={4} />
         <div className="relative z-10 mx-auto space-y-6">
           <div className="flex items-center justify-between">

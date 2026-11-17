@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useRef,
   useState,
   type CSSProperties,
   type DragEvent,
@@ -276,8 +277,64 @@ function PlacedSticker({
   );
 }
 
+/** True while any sticker (from the panel or already on a card) is being dragged. */
+function useStickerDragInProgress() {
+  const [isDragging, setIsDragging] = useState(false);
+
+  useEffect(() => {
+    let frame = 0;
+    // Bubble phase: the source's dragstart handler has already set DRAG_MIME.
+    const onDragStart = (e: globalThis.DragEvent) => {
+      if (!e.dataTransfer?.types.includes(DRAG_MIME)) return;
+      // Defer so the browser snapshots the drag image before the panel fades.
+      frame = requestAnimationFrame(() => setIsDragging(true));
+    };
+    const onDragFinish = () => {
+      cancelAnimationFrame(frame);
+      setIsDragging(false);
+    };
+    window.addEventListener("dragstart", onDragStart);
+    window.addEventListener("dragend", onDragFinish);
+    window.addEventListener("drop", onDragFinish);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("dragstart", onDragStart);
+      window.removeEventListener("dragend", onDragFinish);
+      window.removeEventListener("drop", onDragFinish);
+    };
+  }, []);
+
+  return isDragging;
+}
+
 /** Floating tray of stickers that can be dragged onto any card. */
-export function StickerPanel({ onClose }: { onClose: () => void }) {
+export function StickerPanel({
+  onClose,
+  onHeightChange,
+}: {
+  onClose: () => void;
+  /** Reports the space the panel covers at the bottom of the viewport (0 when unmounted). */
+  onHeightChange?: (height: number) => void;
+}) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  const isDragging = useStickerDragInProgress();
+
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel || !onHeightChange) return;
+    const report = () =>
+      onHeightChange(window.innerHeight - panel.getBoundingClientRect().top);
+    report();
+    const observer = new ResizeObserver(report);
+    observer.observe(panel);
+    window.addEventListener("resize", report);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", report);
+      onHeightChange(0);
+    };
+  }, [onHeightChange]);
+
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -309,9 +366,14 @@ export function StickerPanel({ onClose }: { onClose: () => void }) {
 
   return (
     <div
+      ref={panelRef}
       role="dialog"
       aria-label="Sticker panel"
-      className="fixed bottom-6 left-1/2 z-50 w-[min(760px,calc(100vw-2rem))] -translate-x-1/2 rounded-xl border bg-popover/95 p-3 text-popover-foreground shadow-2xl backdrop-blur"
+      className={cn(
+        "fixed bottom-6 left-1/2 z-50 w-[min(760px,calc(100vw-2rem))] -translate-x-1/2 rounded-xl border bg-popover/95 p-3 text-popover-foreground shadow-2xl backdrop-blur transition-opacity duration-150",
+        // Step aside mid-drag so cards underneath the panel can take the drop.
+        isDragging && "pointer-events-none opacity-15",
+      )}
     >
       <div className="mb-2 flex items-center justify-between">
         <div>
