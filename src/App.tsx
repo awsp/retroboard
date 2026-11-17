@@ -46,9 +46,13 @@ function App() {
   const [isStickerPanelOpen, setIsStickerPanelOpen] = useState(false);
 
   useEffect(() => {
+    // In dev the socket server runs beside Vite on :3001; in a production
+    // build the same server also serves the page, so use the page's origin.
     const socketUrl =
       import.meta.env.VITE_SOCKET_URL ||
-      window.location.origin.replace(/:\d+$/, ":3001");
+      (import.meta.env.DEV
+        ? window.location.origin.replace(/:\d+$/, ":3001")
+        : window.location.origin);
     const newSocket = io(socketUrl);
     setSocket(newSocket);
 
@@ -102,7 +106,11 @@ function App() {
     socket?.emit("edit-card", { columnKey, cardId, newText });
   };
 
-  const placeSticker = (columnKey: string, cardId: string, drop: StickerDrop) => {
+  const placeSticker = (
+    columnKey: string,
+    cardId: string,
+    drop: StickerDrop,
+  ) => {
     socket?.emit("place-sticker", { columnKey, cardId, ...drop });
   };
 
@@ -122,10 +130,7 @@ function App() {
     socket?.emit("remove-sticker", { columnKey, cardId, placementId });
   };
 
-  const closeStickerPanel = useCallback(
-    () => setIsStickerPanelOpen(false),
-    [],
-  );
+  const closeStickerPanel = useCallback(() => setIsStickerPanelOpen(false), []);
 
   const handleResetBoard = (password: string) => {
     socket?.emit("reset-board", { password });
@@ -146,9 +151,7 @@ function App() {
         onClose={() => setIsExportDialogOpen(false)}
         onConfirm={handleExport}
       />
-      {isStickerPanelOpen && (
-        <StickerPanel onClose={closeStickerPanel} />
-      )}
+      {isStickerPanelOpen && <StickerPanel onClose={closeStickerPanel} />}
       <ResetBoardDialog
         isOpen={isResetDialogOpen}
         onClose={() => setIsResetDialogOpen(false)}

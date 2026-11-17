@@ -3,14 +3,40 @@ import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import cors from "cors";
+import path from "path";
+import embeddedAssets from "./embeddedAssets.js";
 import { COLUMN_DEFINITIONS } from "../shared/columnConfig.js";
 import { STICKER_MAP, MAX_STICKERS_PER_CARD } from "../shared/stickers.js";
 
 const app = express();
 app.use(cors());
 
+// Single-file build: serve the embedded client, falling back to index.html.
+if (embeddedAssets) {
+  const files = new Map(
+    Object.entries(embeddedAssets).map(([file, base64]) => [
+      file,
+      Buffer.from(base64, "base64"),
+    ]),
+  );
+  app.get("*", (req, res, next) => {
+    const file = files.has(req.path) ? req.path : "/index.html";
+    const body = files.get(file);
+    if (!body) return next();
+    res.type(path.extname(file));
+    res.set(
+      "Cache-Control",
+      file.startsWith("/assets/")
+        ? "public, max-age=31536000, immutable"
+        : "no-cache",
+    );
+    res.send(body);
+  });
+}
+
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
+  serveClient: false,
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
